@@ -1,0 +1,30 @@
+version: "3.7"
+
+x-services:
+
+  monitor:
+    &monitor
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: .
+      args:
+        - PROJECT_ROOT=${PROJECT_ROOT}
+        - MONITOR_USER=${MONITOR_USER}
+        - MONITOR_GROUP=${MONITOR_GROUP}
+        - UID=${UID}
+        - GID=${GID}
+    volumes:
+      - ./monitor/:${PROJECT_ROOT}
+
+services:
+
+  # TODO: make sure that Kafka is up and running on start
+  producer:
+    <<: *monitor
+    container_name: "producer"
+    command: "python main.py producer http://google.com --pattern \"I'm Feeling Lucky\" --interval 10.0"
+
+  consumer:
+    <<: *monitor
+    container_name: "consumer"
+    command: "python main.py consumer"

@@ -1,0 +1,57 @@
+version: "3.7"
+
+volumes:
+  postgres_data:
+
+services:
+
+  db:
+    image: postgres:12.0-alpine
+    container_name: "$DB_CONTAINER_NAME"
+    env_file:
+      - ./env/.env.db.dev
+    expose:
+      - "$DB_PORT"
+    ports:
+      - "$DB_HOST_PORT:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    container_name: '$ZOOKEEPER_CONTAINER_NAME'
+    expose:
+      - '$ZOOKEEPER_PORT'
+    env_file:
+      - ./env/.env.dev
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=$ZOOKEEPER_ALLOW_ANONYMOUS_LOGIN
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    container_name: '$KAFKA_CONTAINER_NAME'
+    expose:
+      - '$KAFKA_PORT'
+    env_file:
+      - ./env/.env.dev
+    environment:
+      - KAFKA_BROKER_ID=$KAFKA_BROKER_ID
+      - KAFKA_LISTENERS=$KAFKA_LISTENERS
+      - KAFKA_ADVERTISED_LISTENERS=$KAFKA_ADVERTISED_LISTENERS
+      - KAFKA_ZOOKEEPER_CONNECT=$KAFKA_ZOOKEEPER_CONNECT
+      - ALLOW_PLAINTEXT_LISTENER=$KAFKA_ALLOW_PLAINTEXT_LISTENER
+    depends_on:
+      - zookeeper
+
+  producer:
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - kafka
+
+  consumer:
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - kafka
+      - db
