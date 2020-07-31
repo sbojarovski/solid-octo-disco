@@ -52,6 +52,7 @@ services:
   consumer:
     env_file:
       - ./env/.env.dev
+      - ./env/.env.db.dev
     depends_on:
       - kafka
       - db

@@ -1,5 +1,7 @@
 FROM python:3.8-slim
 
+RUN apt-get update && apt-get install -y libpq-dev gcc
+
 ARG PROJECT_ROOT
 ARG MONITOR_USER
 ARG MONITOR_GROUP

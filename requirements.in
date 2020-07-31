@@ -3,3 +3,4 @@ crc32c
 requests
 pytest
 pytest-xdist
+psycopg2
