@@ -17,6 +17,7 @@ packaging==20.4           # via pytest
 pluggy==0.13.1            # via pytest
 psycopg2==2.8.5           # via -r requirements.in
 py==1.9.0                 # via pytest
+pydantic==1.6.1           # via -r requirements.in
 pyparsing==2.4.7          # via packaging
 pytest-forked==1.2.0      # via pytest-xdist
 pytest-xdist==1.33.0      # via -r requirements.in
