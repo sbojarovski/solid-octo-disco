@@ -49,3 +49,6 @@ class Consumer(StoppableThread):
                     log.error(f'Could not save message to database. Appending to DLQ')
                     with self.dispatcher.lock:
                         self.dispatcher.dead_letter_queue.append(wh)
+
+            if self.stopped():
+                return

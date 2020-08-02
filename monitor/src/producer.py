@@ -77,3 +77,5 @@ class Producer(StoppableThread):
                     }
                     self.send(message)
 
+            if self.stopped():
+                return
