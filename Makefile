@@ -43,3 +43,7 @@ run-test: build-test
 	docker-compose $(DC_DB_FILES) start db && \
 	docker-compose $(DC_TEST_FILES) run test && \
 	docker-compose $(DC_DB_FILES) stop db
+
+run-test-shell: build-test
+	docker-compose $(DC_DB_FILES) start db && \
+	docker-compose $(DC_TEST_FILES) run test bash
