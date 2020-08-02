@@ -32,12 +32,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    kafka_env = settings.KAFKA_HOST, settings.KAFKA_PORT,
-
     if args.client_type == 'producer':
         threads = [
             Producer(
-                *kafka_env,
                 website=args.website,
                 pattern=args.pattern,
                 check_interval=args.interval,
@@ -50,7 +47,6 @@ if __name__ == '__main__':
         )
         threads = [
             Consumer(
-                *kafka_env,
                 dispatcher=resource_dispatcher,
                 name='kafka_consumer',
             ),
