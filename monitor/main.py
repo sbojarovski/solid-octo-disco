@@ -4,6 +4,10 @@ import argparse
 import src.settings as settings
 from src.producer import Producer
 from src.consumer import Consumer
+from src.resource_dispatcher import ResourceDispatcher
+from src.dead_letter_handler import DeadLetterHandler
+from src.models import WebsiteHealth
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,14 +35,34 @@ if __name__ == '__main__':
     kafka_env = settings.KAFKA_HOST, settings.KAFKA_PORT,
 
     if args.client_type == 'producer':
-        client = Producer(
-            *kafka_env,
-            website=args.website,
-            pattern=args.pattern,
-            check_interval=args.interval
-        )
+        threads = [
+            Producer(
+                *kafka_env,
+                website=args.website,
+                pattern=args.pattern,
+                check_interval=args.interval,
+                name='kafka_producer',
+            ),
+        ]
     else:
-        client = Consumer(*kafka_env)
+        resource_dispatcher = ResourceDispatcher(
+            dead_letter_queue=[],
+        )
+        threads = [
+            Consumer(
+                *kafka_env,
+                dispatcher=resource_dispatcher,
+                name='kafka_consumer',
+            ),
+            DeadLetterHandler(
+                model_mapper=WebsiteHealth,
+                dispatcher=resource_dispatcher,
+                name='dead_letter_handler',
+            )
+        ]
 
-    client.start()
-    client.join()
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()

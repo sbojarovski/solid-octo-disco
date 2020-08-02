@@ -35,7 +35,7 @@ class Producer(StoppableThread):
             bootstrap_servers=[
                 f'{settings.KAFKA_HOST}:{settings.KAFKA_PORT}'
             ],
-            value_serializer=lambda m: json.dumps(m).encode('utf-8'),
+            value_serializer=lambda m: json.dumps(m, default=str).encode('utf-8'),
         )
 
     def send(self, message):
@@ -69,9 +69,11 @@ class Producer(StoppableThread):
                     if self.pattern is not None:
                         pattern_found = self.pattern.match(response.text)
                     message = {
+                        'url': self.website,
                         'status_code': response.status_code,
                         'response_time': response.elapsed.total_seconds(),
                         'pattern_found': pattern_found if pattern_found is not None else False,
+                        'timestamp': datetime.utcnow(),
                     }
                     self.send(message)
 

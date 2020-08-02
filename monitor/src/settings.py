@@ -9,3 +9,5 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'monitor_db_password')
 DB_HOST = os.environ.get('DB_HOST', 'db')
 DB_PORT = os.environ.get('DB_PORT', 5432)
 DB_NAME = os.environ.get('DB_NAME', 'monitor_db')
+
+DEAD_LETTER_RETRY_SECONDS = 5
