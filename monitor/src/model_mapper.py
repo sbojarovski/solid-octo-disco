@@ -62,6 +62,7 @@ class ModelMapper(BaseModel):
             with cls.database.connection as conn:
                 with conn.cursor() as cur:
                     cur.execute(cls._table_definition())
+                    log.info(f'Created database table {cls.table_name}')
         except Exception as e:
             log.exception(e)
 
@@ -103,7 +104,7 @@ class ModelMapper(BaseModel):
             with conn.cursor() as cur:
                 insert_single_query = f"""
                 INSERT INTO {cls.table_name}
-                    ({cls.columns()})
+                    ({', '.join(cls.columns())})
                 VALUES
                     {cls._column_values_placeholder()}
                 ;
