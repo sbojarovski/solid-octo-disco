@@ -18,13 +18,14 @@ x-services:
 
 services:
 
-  # TODO: make sure that Kafka is up and running on start
   producer:
     <<: *monitor
     container_name: "producer"
-    command: "python main.py producer http://google.com --pattern \"I'm Feeling Lucky\" --interval 10.0"
 
   consumer:
     <<: *monitor
     container_name: "consumer"
-    command: "python main.py consumer"
+
+  test:
+    <<: *monitor
+    container_name: "test"

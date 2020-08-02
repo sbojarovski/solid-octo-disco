@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+
+  test:
+    env_file:
+      - ./env/.env.db.dev
+      - ./env/.env.dev
+    entrypoint: "/entrypoint.d/wait_for_postgres.sh"
+    command: "python -m pytest -n 4"
