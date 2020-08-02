@@ -39,27 +39,29 @@ class ModelMapper(BaseModel):
     table_name: ClassVar = None
     database: ClassVar = Database()
 
-    @property
-    def _column_definitions(self) -> str:
-        return '\n'.join([
-            f'{name} {field.column_type},' for name, field in self.__fields__.items()
+    @classmethod
+    # TODO: would have been nice to have these as class properties (instead of methods)
+    def _column_definitions(cls) -> str:
+        return ','.join([
+            f'{name} {field.column_type}\n' for name, field in cls.__fields__.items()
         ])
 
-    @property
-    def _table_definition(self) -> str:
+    @classmethod
+    def _table_definition(cls) -> str:
         table_definition = f"""
-        CREATE TABLE IF NOT EXISTS {self.table_name} (
+        CREATE TABLE IF NOT EXISTS {cls.table_name} (
             id SERIAL PRIMARY KEY,
-            {self._column_definitions}
+            {cls._column_definitions()}
         );
         """
         return table_definition
 
-    def _create_table(self):
+    @classmethod
+    def _create_table(cls):
         try:
-            with self.database.connection as conn:
+            with cls.database.connection as conn:
                 with conn.cursor() as cur:
-                    cur.execute(self._table_definition)
+                    cur.execute(cls._table_definition())
         except Exception as e:
             log.exception(e)
 
@@ -67,33 +69,54 @@ class ModelMapper(BaseModel):
     def values(self) -> List:
         return list(self.__dict__.values())
 
-    @property
-    def columns(self) -> List[str]:
-        return list(self.__dict__.keys())
+    @classmethod
+    def columns(cls) -> List[str]:
+        return list(dict(cls.__dict__.items())['__fields__'].keys())
 
-    @property
-    def _column_values_placeholder(self):
-        num_cols = len(self.columns)
+    @classmethod
+    def _column_values_placeholder(cls):
+        num_cols = len(cls.columns())
         return f'({", ".join(["%s"] * num_cols)})'
 
     @classmethod
-    def bulk_create(cls, records):
+    def bulk_create(cls, records: List):
+        """
+        Inserts multiple records to the database
+        """
         with cls.database.connection as conn:
             with conn.cursor() as cur:
-                records_values = ','.join([
-                    cur.mogrify(cls._column_values_placeholder, r.values) for r in records
+                mogrified_values = ','.join([
+                    cur.mogrify(cls._column_values_placeholder(), r.values).decode('utf-8') for r in records
                 ])
                 insert_many_query = f"""
-                INSERT INTO {cls.table_name} ({cls.columns}) VALUES {records_values}
-                """
+                INSERT INTO {cls.table_name} ({', '.join(cls.columns())}) VALUES {mogrified_values}
+                ;"""
                 # TODO: Dead Letter Queue
                 cur.execute(insert_many_query)
 
-    def create(self):
-        with self.database.connection as conn:
+    @classmethod
+    def create(cls, record):
+        """
+        Inserts one record to the database.
+        """
+        with cls.database.connection as conn:
             with conn.cursor() as cur:
                 insert_single_query = f"""
-                INSERT INTO {self.table_name} ({self.columns}) VALUES %s
+                INSERT INTO {cls.table_name}
+                    ({cls.columns()})
+                VALUES
+                    {cls._column_values_placeholder()}
+                ;
                 """
-                query = cur.mogrify(insert_single_query, self.values)
+                query = cur.mogrify(insert_single_query, record.values)
                 cur.execute(query)
+
+    def save(self):
+        """
+        NOTE: Deliberately not implemented.
+        Saving (updating) is meant to be called on an instance of a method,
+        and would also require to map out the retrieving of objects from the database.
+        At that point I might as well use a fully implemented ORM.
+        :return:
+        """
+        raise NotImplementedError

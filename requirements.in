@@ -5,3 +5,5 @@ pytest
 pytest-xdist
 pydantic
 psycopg2
+freezegun
+pytest-cov
