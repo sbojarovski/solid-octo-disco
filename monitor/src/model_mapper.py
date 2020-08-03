@@ -92,7 +92,6 @@ class ModelMapper(BaseModel):
                 insert_many_query = f"""
                 INSERT INTO {cls.table_name} ({', '.join(cls.columns())}) VALUES {mogrified_values}
                 ;"""
-                # TODO: Dead Letter Queue
                 cur.execute(insert_many_query)
 
     @classmethod

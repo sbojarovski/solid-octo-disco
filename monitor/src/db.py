@@ -1,23 +1,25 @@
 import psycopg2
 
-from pydantic import (
-    BaseModel,
-    PostgresDsn,
-)
-
-from src.settings import (
-    DB_USER,
-    DB_PASSWORD,
-    DB_HOST,
-    DB_PORT,
-    DB_NAME,
-)
+import src.settings as settings
 
 
-class Database(BaseModel):
-    dsn: PostgresDsn = \
-        f'postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+class Database:
+    @property
+    def connection_kwargs(self):
+        kwargs = {
+            'host': settings.DB_HOST,
+            'port': settings.DB_PORT,
+            'user': settings.DB_USER,
+            'password': settings.DB_PASSWORD,
+            'dbname': settings.DB_NAME,
+        }
+        if settings.DB_SSL_REQUIRED:
+            kwargs.update({
+                'sslmode': 'verify-ca',
+                'sslrootcert': settings.DB_CA_PEM,
+            })
+        return kwargs
 
     @property
     def connection(self):
-        return psycopg2.connect(self.dsn)
+        return psycopg2.connect(**self.connection_kwargs)

@@ -24,6 +24,10 @@ class Consumer(StoppableThread):
                 f'{settings.KAFKA_HOST}:{settings.KAFKA_PORT}'
             ],
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+            security_protocol=settings.KAFKA_SECURITY_PROTOCOL,
+            ssl_cafile=settings.KAFKA_SSL_CAFILE,
+            ssl_certfile=settings.KAFKA_SSL_CERTFILE,
+            ssl_keyfile=settings.KAFKA_SSL_KEYFILE,
         )
         self.dispatcher = dispatcher
 

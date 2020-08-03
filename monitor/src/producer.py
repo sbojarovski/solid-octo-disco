@@ -36,6 +36,10 @@ class Producer(StoppableThread):
                 f'{settings.KAFKA_HOST}:{settings.KAFKA_PORT}'
             ],
             value_serializer=lambda m: json.dumps(m, default=str).encode('utf-8'),
+            security_protocol=settings.KAFKA_SECURITY_PROTOCOL,
+            ssl_cafile=settings.KAFKA_SSL_CAFILE,
+            ssl_certfile=settings.KAFKA_SSL_CERTFILE,
+            ssl_keyfile=settings.KAFKA_SSL_KEYFILE,
         )
 
     def send(self, message):

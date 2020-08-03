@@ -3,10 +3,12 @@ DC_BASE = docker-compose.yml
 DC_DB = docker-compose.db.yml
 DC_DEV = docker-compose.dev.yml
 DC_TEST = docker-compose.test.yml
+DC_PROD = docker-compose.prod.yml
 
 DC_DB_FILES = -f $(DC_BASE) -f $(DC_DB)
 DC_DEV_FILES = $(DC_DB_FILES) -f $(DC_DEV)
 DC_TEST_FILES = $(DC_DB_FILES) -f $(DC_TEST)
+DC_PROD_FILES = -f $(DC_BASE) -f $(DC_PROD)
 
 produce_single_message = "PYTHONPATH=. python ./src/commands/produce_single_message.py"
 initialize_database_tables = "PYTHONPATH=. python ./src/commands/initialize_database_tables.py"
@@ -18,11 +20,17 @@ build-dev:
 build-test:
 	docker-compose $(DC_TEST_FILES) build
 
+build-prod:
+	docker-compose $(DC_PROD_FILES) build
+
 run-producer-dev: build-dev
 	docker-compose $(DC_DEV_FILES) run producer
 
 init-db-dev: build-dev
 	docker-compose $(DC_DEV_FILES) run consumer bash -c $(initialize_database_tables)
+
+init-db-prod: build-prod
+	docker-compose $(DC_PROD_FILES) run consumer bash -c $(initialize_database_tables)
 
 run-consumer-dev: build-dev init-db-dev
 	docker-compose $(DC_DEV_FILES) run consumer
@@ -36,6 +44,9 @@ purge-topic-dev: build-dev
 produce-single-dev: build-dev
 	docker-compose $(DC_DEV_FILES) run producer bash -c $(produce_single_message)
 
+produce-single-prod: build-prod
+	docker-compose $(DC_PROD_FILES) run producer bash -c $(produce_single_message)
+
 run-dev: build-dev init-db-dev
 	docker-compose $(DC_DEV_FILES) up
 
@@ -47,3 +58,12 @@ run-test: build-test
 run-test-shell: build-test
 	docker-compose $(DC_DB_FILES) start db && \
 	docker-compose $(DC_TEST_FILES) run test bash
+
+run: build-prod
+	docker-compose $(DC_PROD_FILES) up
+
+run-producer: build-prod
+	docker-compose $(DC_PROD_FILES) run producer
+
+run-consumer: build-prod
+	docker-compose $(DC_PROD_FILES) run consumer

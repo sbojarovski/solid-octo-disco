@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+
+  producer:
+    env_file:
+      - ./env/.env.prod
+    entrypoint: "python /entrypoint.d/wait_for_kafka.py"
+    command: "python main.py producer http://google.com --pattern \"I'm Feeling Lucky\" --interval 10.0"
+
+  consumer:
+    env_file:
+      - ./env/.env.prod
+    entrypoint: "/entrypoint.d/wait_for_postgres.sh python /entrypoint.d/wait_for_kafka.py"
+    command: "python main.py consumer"
