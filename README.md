@@ -9,6 +9,22 @@ There are some manual steps for setting up the environment:
 - Create copies of the relevant `*.sample` environment files (`.env.sample` in the root, as well as the `.env.*.sample` files in the `env` folder)
 - Set the proper values for the Kafka, Zookeeper, and PostgreSQL instances
 - Set the proper parameters for the producer in the `docker-compose.prod.yml` file
+- The `Dockerfile` expects the security certificates to be inside a `cert` folder (It was gitignored and not uploaded to the repository):
+
+```
+.
+├── cert
+│   ├── kafka
+│   │   ├── ca.pem
+│   │   ├── service.cert
+│   │   └── service.key
+│   └── postgres
+│       └── ca.pem
+├── Dockerfile
+├── wait_for_kafka.py
+└── wait_for_postgres.sh
+```
+
 - Start both the producer and consumer with:
 
 ```bash
